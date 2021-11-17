@@ -2,6 +2,7 @@
 
 <head>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
     <script type="text/javascript" src="chloroplethtime.js"></script>
 
     <style>
@@ -15,6 +16,7 @@
     <input type="range" id='slider' min="0" max="200" step="1"></input>
     <br>
     <script>
+        chgraphtime();
         async function getAverageByState() {
             let countyIncome = await d3.csv('kaggle_income.csv');
             let states = new Set(d3.map(countyIncome, d => d['State_ab']));

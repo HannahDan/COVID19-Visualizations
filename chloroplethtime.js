@@ -57,7 +57,7 @@ function chgraphtime() {
                 .attr("class", "states")
                 .join("path")
                 .attr("d", path)
-                .attr("fill", d => colorScale(d.properties.avg_vaccination_rate));
+                .attr("fill", d => colorScale(d.properties.avg_vaccination_rate.date));
             mapArea.append("path").datum(stMesh)
                 .attr("class", "zipmesh")
                 .attr("d", path)
@@ -72,28 +72,29 @@ function chgraphtime() {
                 .style("stroke-width", 1);
 
 
-            console.log(st.features)
+            console.log(st)
 
-            // function update(time) {
-            //     const svg1 = d3.select("#vis1");
+            function update(time) {
+                const svg = d3.select("#vis1");
 
-            //     const vacMax = d3.max(data, c => c['people_fully_vaccinated']);
-            //     const vacScale = d3.scaleLinear().domain([0, vacMax]).range([0, mapWidth]);
-            //     //console.log(x)
-            //     svg1.selectAll("states").data(st.features)
-            //         .join(update => update
-            //             .attr("fill", d => colorScale(d.properties.avg_vaccination_rate)),
-            //             exit => {
-            //                 exit.remove()
-            //             }
-            //         );
+                let aScale = d3.scaleLinear().domain([-160, 160]).range([10, 410]);
+                let bScale = d3.scaleLinear().domain([-160, 160]).range([410, 10]);
+                const vacMax = d3.max(data, c => c['people_fully_vaccinated']);
+                const vacScale = d3.scaleLinear().domain([0, vacMax]).range([0, mapWidth]);
+                //console.log(x)
+                svg.selectAll("circle").data(data)
+                    .join(update => update
+                        .attr("fill", d => colorScale(d.properties.avg_vaccination_rate[time])),
+                        exit => {
+                            exit.remove()
+                        }
+                    );
 
-            // }
-            //d3.select('#slider').on('input', function () { update(this.value) });
+            }
+            d3.select('#slider').on('input', function () { update(this.value) });
+            update(rangeDate[0]);
 
-            //update(rangeDate[0]);
         })
-
 
     }
     requestData();
