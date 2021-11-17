@@ -4,4 +4,36 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script type="text/javascript" src="chloroplethtime.js"></script>
 
+    <style>
+
+    </style>
 </head>
+
+<body>
+    <script>
+        async function getAverageByState() {
+            let countyIncome = await d3.csv('kaggle_income.csv');
+            let states = new Set(d3.map(countyIncome, d => d['State_ab']));
+            let statesIncome = [];
+
+            countyIncome.forEach((d, i) => {
+                d.Median = Number(d.Median)
+            });
+            states.forEach(d => {
+                let sum = 0;
+                let i = d3.filter(countyIncome, c => {
+                    return c['State_ab'] === d;
+                });
+                i.forEach(c => {
+                    sum = sum + c['Median'];
+                })
+                //  console.log(sum)
+                statesIncome.push({ state: d, income: sum / i.length });
+            });
+            console.log(statesIncome)
+        }
+        getAverageByState();
+    </script>
+</body>
+
+</html>
