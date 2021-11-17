@@ -57,7 +57,7 @@ function chgraphtime() {
                 .attr("class", "states")
                 .join("path")
                 .attr("d", path)
-                .attr("fill", d => colorScale(d.properties.avg_vaccination_rate.date));
+                .attr("fill", d => colorScale(d.properties.avg_vaccination_rate));
             mapArea.append("path").datum(stMesh)
                 .attr("class", "zipmesh")
                 .attr("d", path)
