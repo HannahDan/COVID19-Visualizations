@@ -72,8 +72,8 @@
 
       <script id="jkm253">
 
-        // Jade's graph
 
+        // Data filtering for average median income per state
         let getData = async function () {
             let countyIncome = d3.csv('kaggle_income.csv', d3.autoType).then(countyIncome => {
                 let states = new Set(d3.map(countyIncome, d => d['State_Name']));
@@ -93,7 +93,12 @@
                     //  console.log(sum)
                     statesIncome.push({ state: d, income: sum / i.length });
                 });
+                console.log(statesIncome)
 
+
+    //=============================================================================================
+    //############################# Jade's Graph #################################################
+    //=============================================================================================
                 let state_data = d3.json('us_states.json', d3.autoType).then(state_data => {
                     var state_income = statesIncome;
 
