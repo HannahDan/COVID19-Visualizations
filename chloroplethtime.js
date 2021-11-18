@@ -16,7 +16,7 @@ function chgraphtime() {
             //     'date2': {}
             // }}
 
-            const svg = d3.select("#vis1").append('svg').attr('width', 725).attr('height', 350);
+            const svg = d3.select("#vis1").append('svg').style("margin", "auto").attr('width', 750).attr('height', 500);
             const width = svg.attr('width');
             const height = svg.attr('height');
             const margins = { top: 5, right: 5, left: 20, bottom: 20 };
@@ -103,6 +103,7 @@ function chgraphtime() {
                     list.append("li").text("Up to " + Math.floor(colorScale.invertExtent(d)[1]) + " vaccinations").style('color', d);
                 }
             });
+            list.append("li").text("No information for date").style('color', 'grey');
             d3.select('#slider')
                 .attr('min', rangeDate[0].getTime() / 1000)
                 .attr('max', rangeDate[1].getTime() / 1000)

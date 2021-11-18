@@ -9,14 +9,26 @@
     <script src="https://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
 
     <style>
+        body * {
+            font-family: 'Optima', sans-serif;
+            /* text-align: center; */
+            margin-left: auto;
+            margin-right: auto;
 
+        }
+
+        p {
+            background-color: rgba(156, 180, 224, 0.468);
+            padding-top: 10;
+            padding-bottom: 10;
+        }
     </style>
 </head>
 
 <body>
-    <h2>Number of People Fully Vaccinated for COVID-19 from Jan 2021 to Nov 2021</h2>
-    <div id="vis1"></div>
-    <p>
+    <h2 style="text-align: center;">Number of People Fully Vaccinated for COVID-19 from Jan 2021 to Nov 2021</h2>
+    <div id="vis1" style="display: block;"></div>
+    <p style=" text-align: center;">
         <label for="amount">Date slider:</label>
         <input type="range" id='slider' step="86400"></input>
     <h4>Key</h4>
