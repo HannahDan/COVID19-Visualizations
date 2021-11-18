@@ -23,27 +23,177 @@
     <script>
         chgraphtime();
         async function getAverageByState() {
-            let countyIncome = await d3.csv('kaggle_income.csv');
-            let states = new Set(d3.map(countyIncome, d => d['State_ab']));
-            let statesIncome = [];
+            let countyIncome = d3.csv('kaggle_income.csv', d3.autoType).then(countyIncome => {
+                let states = new Set(d3.map(countyIncome, d => d['State_ab']));
+                let statesIncome = [];
 
-            countyIncome.forEach((d, i) => {
-                d.Median = Number(d.Median)
-            });
-            states.forEach(d => {
-                let sum = 0;
-                let i = d3.filter(countyIncome, c => {
-                    return c['State_ab'] === d;
+                countyIncome.forEach((d, i) => {
+                    d.Median = Number(d.Median)
                 });
-                i.forEach(c => {
-                    sum = sum + c['Median'];
-                })
-                //  console.log(sum)
-                statesIncome.push({ state: d, income: sum / i.length });
+                states.forEach(d => {
+                    let sum = 0;
+                    let i = d3.filter(countyIncome, c => {
+                        return c['State_ab'] === d;
+                    });
+                    i.forEach(c => {
+                        sum = sum + c['Median'];
+                    })
+                    //  console.log(sum)
+                    statesIncome.push({ state: d, income: sum / i.length });
+                });
+                console.log(statesIncome);
+                return statesIncome;
             });
-            console.log(statesIncome)
         }
-        getAverageByState();
+
+        // Jade's graph
+
+        let getData = async function () {
+            let countyIncome = d3.csv('kaggle_income.csv', d3.autoType).then(countyIncome => {
+                let states = new Set(d3.map(countyIncome, d => d['State_Name']));
+                let statesIncome = [];
+
+                countyIncome.forEach((d, i) => {
+                    d.Median = Number(d.Median)
+                });
+                states.forEach(d => {
+                    let sum = 0;
+                    let i = d3.filter(countyIncome, c => {
+                        return c['State_Name'] === d;
+                    });
+                    i.forEach(c => {
+                        sum = sum + c['Median'];
+                    })
+                    //  console.log(sum)
+                    statesIncome.push({ state: d, income: sum / i.length });
+                });
+
+                let state_data = d3.json('us_states.json', d3.autoType).then(state_data => {
+                    var state_income = statesIncome;
+
+                    let svg = d3.select("svg#jkm253");
+                    let svgWidth = svg.attr("width");
+                    let svgHeight = svg.attr("height");
+
+                    let states = topojson.feature(state_data, state_data.objects.states);
+                    let statesMesh = topojson.mesh(state_data, state_data.objects.states);
+                    let usMesh = topojson.mesh(state_data, state_data.objects.nation);
+
+                    let projection = d3.geoAlbersUsa().fitSize([svgWidth, svgHeight], states);
+                    var path = d3.geoPath().projection(projection);
+
+                    let colorArray = ["#0d06aa", "#0055d5", "#1eabd0", "#00d4a1", "#6aff45"];
+
+                    for (var i = 0; i < state_income.length; i++) {
+                        let per = state_data.objects.states.geometries;
+                        let arr_state = state_income[i].state;
+                        let arr_income = state_income[i].income;
+
+                        for (var j = 0; j < per.length; j++) {
+                            var json_state = per[j].properties.name;
+                            if (arr_state == json_state) {
+                                per[j].properties.value = arr_income;
+                                break;
+                            };
+                        };
+                    };
+
+                    incomeExtent = d3.extent(state_income, d => d['income']);
+
+                    let colorScale = d3.scaleQuantile()
+                        .domain(incomeExtent)
+                        .range(colorArray);
+
+                    svg.selectAll("path.states")
+                        .data(states.features)
+                        .join("path")
+                        .attr("class", "states")
+                        .attr("d", path)
+                        .style("fill", d => colorScale(d.properties.value));
+
+                    svg.append("path")
+                        .datum(statesMesh)
+                        .attr("class", "outline")
+                        .attr("d", path)
+                        .style("stroke-width", 1)
+                        .style("stroke", "white")
+                        .style("fill", "none");
+
+                    svg.append("path")
+                        .datum(usMesh)
+                        .attr("class", "outline")
+                        .attr("d", path)
+                        .style("stroke-width", 3)
+                        .style("stroke", "darkgrey")
+                        .style("fill", "none");
+
+                });
+
+            });
+
+
+
+            /**
+            
+                    let state_data = await d3.json("us_states.json");
+            
+            let state_income = getAverageByState();
+            
+                    console.log("hey");
+                    console.log(state_data);
+                    console.log(state_income);
+            
+                    let svg = d3.select("svg#jkm253");
+                    let svgWidth = svg.attr("width");
+                    let svgHeight = svg.attr("height");
+            
+                    let states = topojson.feature(state_data, state_data.objects.states);
+                    let statesMesh = topojson.mesh(state_data, state_data.objects.states);
+                    let usMesh = topojson.mesh(state_data, state_data.objects.nation);
+            
+                    let projection = d3.geoMercator().fitSize([svgWidth, svgHeight], states);
+                    var path = d3.geoPath().projection(projection);
+            
+                    let colorArray = ["#0d06aa","#0055d5","#1eabd0","#00d4a1","#6aff45"];
+            
+                    incomeExtent = d3.extent(state_income, d=>d['income']);
+            
+                    let colorScale = d3.scaleQuantile()
+                      .domain(incomeExtent)
+                      .range(colorArray);
+            
+                    console.log(states.features);
+            
+                    svg.selectAll("path.states")
+                      .data(state_income)
+                      .join("path")
+                      .attr("class", "states")
+                      .attr("d", path)
+                      .style("fill",d=>colorScale(d.income));
+            
+                    svg.append("path")
+                      .datum(statesMesh)
+                      .attr("class","outline")
+                      .attr("d", path)
+                      .style("stroke-width",1)
+                      .style("stroke","white")
+                      .style("fill","none");
+            
+                    svg.append("path")
+                      .datum(usMesh)
+                      .attr("class","outline")
+                      .attr("d", path)
+                      .style("stroke-width",3)
+                      .style("stroke","darkgrey")
+                      .style("fill","none");
+            
+                  };**/
+        }
+
+        getData();
+
+
+
     </script>
 </body>
 
