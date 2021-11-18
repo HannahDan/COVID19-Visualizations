@@ -14,6 +14,12 @@
       pointer-events: none;
     }
 
+    .bullet-text{
+            font-family: 'Times New Roman';
+            font-size: 30px;
+            font-style: italic;
+        }
+
     </style>
 </head>
 
@@ -154,7 +160,8 @@
 
                     thresholds.forEach(elem => {
                       list.append("li")
-                        .text("Up to " + elem);
+                        .attr("class", "bullet-text")
+                        .text("Up to " + d3.format("($.0s")(elem))
                     });
 
                     let tooltipWidth = 100;

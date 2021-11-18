@@ -100,7 +100,7 @@ function chgraphtime() {
             const list = d3.select("#list");
             colors.forEach((d) => {
                 if (d != "#ADCF9C") {
-                    list.append("li").text("Up to " + Math.floor(colorScale.invertExtent(d)[1]) + " vaccinations").style('color', d);
+                    list.append("li").text("Up to " + Math.floor(colorScale.invertExtent(d)[1]) + " vaccinations").style('color', d).attr("class", "bullet-text");
                 }
             });
             d3.select('#slider')
