@@ -10,6 +10,10 @@
 
     <style>
 
+    .mouseover {
+      pointer-events: none;
+    }
+
     </style>
 </head>
 
@@ -50,6 +54,17 @@
                 return statesIncome;
             });
         }
+      </script>
+
+    <h2>Median Income by State</h4>
+    <p>
+      <svg id="jkm253" height=350 width=725 style="margin: 20px" /></svg>
+    </p>
+    <h4>Key: Median Income</h4>
+    <ul id="legend">
+    </ul>
+
+      <script id="jkm253">
 
         // Jade's graph
 
@@ -132,67 +147,119 @@
                         .style("stroke", "darkgrey")
                         .style("fill", "none");
 
+                    let thresholds = colorScale.quantiles();
+                    console.log(thresholds);
+
+                    let list = d3.select("ul#legend");
+
+                    thresholds.forEach(elem => {
+                      list.append("li")
+                        .text("Up to " + elem);
+                    });
+
+                    let tooltipWidth = 100;
+                    let tooltipHeight = 25;
+
+                    let moMesh =  svg.append("path")
+                      .attr("class", "mouseOutline");
+
+                    let tooltip = svg.append("g")
+                      .attr("class", "tooltip")
+                      .attr("visibility", "hidden");
+
+                    tooltip.append("rect")
+                      .attr("fill", "black")
+                      .attr("opacity", 0.9)
+                      .attr("x", -tooltipWidth / 2.0)
+                      .attr("y", 0)
+                      .attr("width",tooltipWidth)
+                      .attr("height",tooltipHeight)
+
+                    let labelName = tooltip.append("text")
+                      .attr("fill", "white")
+                      .attr("text-anchor","middle")
+                      .attr("alignment-baseline","hanging")
+                      .attr("x", 0)
+                      .attr("y", 1);
+
+                    let labelValue = tooltip.append("text")
+                      .attr("fill", "white")
+                      .attr("text-anchor","middle")
+                      .attr("alignment-baseline","hanging")
+                      .attr("x", 0)
+                      .attr("y", 20);
+
+                   d3.selectAll(".states").on("mouseenter", mouseEntersPlot);
+                   d3.selectAll(".states").on("mouseout",  mouseLeavesPlot);
+
+                   function mouseEntersPlot() {
+                     tooltip.style("visibility","visible")
+                     let state = d3.select(this);
+                     let stateName = state.datum().name;
+                     labelName.text("hi");
+                     labelValue.text(hey);
+
+                     let bounds = path.bounds(state.datum());
+                     let xPos = (bounds[0][0]+bounds[1][0])/2.0;
+                     let yPos = bounds[1][1] - 15;
+                     tooltip.attr("transform",`translate(${xPos},${yPos})`);
+                     /**var mo = topojson.mesh(us, us.objects.states, function(a, b) { return a.id === stateID || b.id === stateID; });
+                     momesh.datum(mo).attr("d", path)**/
+
+
+
+      // You can use the geoPath() generator to do all sorts of helpful things
+      // let centroid = path.centroid( state.datum() );  // Get the pixel "center" of the state
+        // Get the pixel boundaries of the state
+      // In both cases here, the geoPath() is parsing the fancy topoJSON data to figure out pixels using the projection
+
+      // Place it at the bottom of the state, centered
+
+
+      // Transform the <g> group so that everything moves together easily
+
+
+      // To fix the oscillation, we add this in the CSS for .mouseover
+      //  pointer-events: none;
+
+      // Technically, the right way to do this is with another mesh for some complicated reasons
+      //  You have to use the second parameter of topojson.mesh() to pick out this state's boundaries
+      // At the end of the lecture we tried this out
+      //  First, make a new mesh with a filter for only borders of the current state
+
+      //  Then apply it to your special mesh that's on top of everything else
+
+
+
+
+
+    }
+/**
+    function mouseLeavesPlot() {
+
+     // Hide when you leave a state
+     tooltip.style("visibility","hidden");
+
+     let state = d3.select(this);
+
+     // Reset old style mouseover stroke
+     // state.attr("stroke","none")
+     //      .attr("stroke-width", 0);
+     // }
+
+     // Here we are hiding the mouseover mesh we added at the end of the lecture
+     momesh.attr("d", "");
+
+   }**/
+
+
                 });
+
+
 
             });
 
 
-
-            /**
-            
-                    let state_data = await d3.json("us_states.json");
-            
-            let state_income = getAverageByState();
-            
-                    console.log("hey");
-                    console.log(state_data);
-                    console.log(state_income);
-            
-                    let svg = d3.select("svg#jkm253");
-                    let svgWidth = svg.attr("width");
-                    let svgHeight = svg.attr("height");
-            
-                    let states = topojson.feature(state_data, state_data.objects.states);
-                    let statesMesh = topojson.mesh(state_data, state_data.objects.states);
-                    let usMesh = topojson.mesh(state_data, state_data.objects.nation);
-            
-                    let projection = d3.geoMercator().fitSize([svgWidth, svgHeight], states);
-                    var path = d3.geoPath().projection(projection);
-            
-                    let colorArray = ["#0d06aa","#0055d5","#1eabd0","#00d4a1","#6aff45"];
-            
-                    incomeExtent = d3.extent(state_income, d=>d['income']);
-            
-                    let colorScale = d3.scaleQuantile()
-                      .domain(incomeExtent)
-                      .range(colorArray);
-            
-                    console.log(states.features);
-            
-                    svg.selectAll("path.states")
-                      .data(state_income)
-                      .join("path")
-                      .attr("class", "states")
-                      .attr("d", path)
-                      .style("fill",d=>colorScale(d.income));
-            
-                    svg.append("path")
-                      .datum(statesMesh)
-                      .attr("class","outline")
-                      .attr("d", path)
-                      .style("stroke-width",1)
-                      .style("stroke","white")
-                      .style("fill","none");
-            
-                    svg.append("path")
-                      .datum(usMesh)
-                      .attr("class","outline")
-                      .attr("d", path)
-                      .style("stroke-width",3)
-                      .style("stroke","darkgrey")
-                      .style("fill","none");
-            
-                  };**/
         }
 
         getData();
