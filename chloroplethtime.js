@@ -1,18 +1,5 @@
 function chgraphtime() {
-    // $(function () {
-    //     $("#slider-range").slider({
-    //         range: true,
-    //         min: new Date('2010.01.01').getTime() / 1000,
-    //         max: new Date('2014.01.01').getTime() / 1000,
-    //         step: 86400,
-    //         values: [new Date('2013.01.01').getTime() / 1000, new Date('2013.02.01').getTime() / 1000],
-    //         slide: function (event, ui) {
-    //             $("#amount").val((new Date(ui.values[0] * 1000).toDateString()) + " - " + (new Date(ui.values[1] * 1000)).toDateString());
-    //         }
-    //     });
-    //     $("#amount").val((new Date($("#slider-range").slider("values", 0) * 1000).toDateString()) +
-    //         " - " + (new Date($("#slider-range").slider("values", 1) * 1000)).toDateString());
-    // });
+
     const requestData = async function () {
         const us = await d3.json('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json');
         // console.log(us);
@@ -36,8 +23,7 @@ function chgraphtime() {
             let mapArea = svg.append('g').attr('transform', `translate(${margins.left},${margins.top})`);
             const mapWidth = width - margins.left - margins.right;
             const mapHeight = height - margins.top - margins.bottom;
-            // const states = topojson.feature(data, data.location);
-            // const stateMesh = topojson.mesh(data, data.location);
+
 
 
             const vacMax = d3.max(data, c => c['people_fully_vaccinated']);
@@ -46,6 +32,9 @@ function chgraphtime() {
             //average vaccination rate
             data.forEach((d) => {
                 if (!dict.hasOwnProperty(d.location)) {
+                    if (d.location == "New York State") {
+                        d.location = "New York";
+                    }
                     dict[d.location] = {};
                     dict[d.location][`${d.date.getMonth()}/${d.date.getDate()}`] =
                         d.people_fully_vaccinated;
@@ -64,25 +53,21 @@ function chgraphtime() {
             );
 
 
-
-            console.log(dict)
+            console.log(rangeDate[1]);
 
             var projection = d3
                 .geoAlbersUsa()
                 .fitSize([mapWidth, mapHeight], st);
             let path = d3.geoPath().projection(projection)
-            const colors = ["#0A2F51", "#0F596B", "#16837A", "#74C67A", "#ADCF9C"];
+            const colors = ["#ADCF9C", "#74C67A", "#16837A", "#0F596B", "#0A2F51"];
             console.log(us.objects.states.geometries);
-            const vals = us.objects.states.geometries.map(function (d) {
-                return d.properties.avg_vaccination_rate;
-            });
-            console.log(vals)
+            const vals = data.map((d) => d.people_fully_vaccinated);
             let colorScale = d3.scaleQuantile().domain(vals).range(colors);
-            // mapArea.selectAll("states").data(st.features)
-            //     .attr("class", "states")
-            //     .join("path")
-            //     .attr("d", path)
-            //     .attr("fill", d => colorScale(d.properties.avg_vaccination_rate));
+            mapArea.selectAll("states").data(st.features)
+                .attr("class", "states")
+                .join("path")
+                .attr("d", path)
+                .attr("fill", d => colorScale(d.properties.avg_vaccination_rate));
             mapArea.append("path").datum(stMesh)
                 .attr("class", "zipmesh")
                 .attr("d", path)
@@ -96,24 +81,9 @@ function chgraphtime() {
                 .style("fill", "transparent")
                 .style("stroke-width", 1);
 
-
-            console.log(st)
-
             function update(time) {
                 const dateObj = new Date(time * 1000);
-                const date = dateObj.getMonth() + '/' + dateObj.getDate();
-                const vals = us.objects.states.geometries.map(function (d) {
-                    return d.properties.avg_vaccination_rate[date];
-                });
-                console.log(vals)
-                let colorScale = d3.scaleQuantile().domain(vals).range(colors);
-                console.log(date);
-                mapArea.selectAll("states").data(st.features)
-                    .attr("class", "states")
-                    .join("path")
-                    .attr("d", path)
-                    .attr("fill", d => colorScale(d.properties.avg_vaccination_rate[date]));
-
+                const date = `${dateObj.getMonth()}/${dateObj.getDate()}`;
                 mapArea
                     .selectAll('path.states')
                     .data(st.features)
@@ -127,21 +97,19 @@ function chgraphtime() {
                             : colorScale(d.properties.avg_vaccination_rate[date]);
                     });
             }
-            $(function () {
-                $("#slider-range").slider({
-                    range: false,
-                    min: rangeDate[0].getTime() / 1000,
-                    max: rangeDate[1].getTime() / 1000,
-                    step: 86400,
-                    values: [rangeDate[0].getTime() / 1000, rangeDate[1].getTime() / 1000],
-                    slide: function (event, ui) {
-                        $("#amount").val((new Date(ui.values[0] * 1000).toDateString()));// + " - " + (new Date(ui.values[1] * 1000)).toDateString());
-                    }
-                });
-                $("#amount").val((new Date($("#slider-range").slider("values", 0) * 1000).toDateString())); //+
-                //" - " + (new Date($("#slider-range").slider("values", 1) * 1000)).toDateString());
+            const list = d3.select("#list");
+            colors.forEach((d) => {
+                if (d != "#ADCF9C") {
+                    list.append("li").text("Up to " + Math.floor(colorScale.invertExtent(d)[1]) + " vaccinations").style('color', d);
+                }
             });
-            update(rangeDate[0]);
+            d3.select('#slider')
+                .attr('min', rangeDate[0].getTime() / 1000)
+                .attr('max', rangeDate[1].getTime() / 1000)
+                .on('input', function () {
+                    update(this.value);
+                });
+            update(rangeDate[0].getTime() / 1000);
 
 
         })

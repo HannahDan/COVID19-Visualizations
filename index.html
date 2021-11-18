@@ -14,12 +14,17 @@
 </head>
 
 <body>
+    <h2>Number of People Fully Vaccinated for COVID-19 from Jan 2021 to Nov 2021</h2>
     <div id="vis1"></div>
     <p>
-        <label for="amount">Date range:</label>
-        <input type="text" id="amount" style="border: 0; color: #f6931f; font-weight: bold;" size="100" />
+        <label for="amount">Date slider:</label>
+        <input type="range" id='slider' step="86400"></input>
+    <h4>Key</h4>
+    <ul id="list">
+    </ul>
+
     </p>
-    <div id="slider-range"></div>
+
     <script>
         chgraphtime();
         async function getAverageByState() {
