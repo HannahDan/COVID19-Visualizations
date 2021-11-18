@@ -234,45 +234,8 @@
                     state.attr("stroke","none")
                       .attr("stroke-width", 0);
                   };
-
-
-
-
-      // You can use the geoPath() generator to do all sorts of helpful things
-      // let centroid = path.centroid( state.datum() );  // Get the pixel "center" of the state
-        // Get the pixel boundaries of the state
-      // In both cases here, the geoPath() is parsing the fancy topoJSON data to figure out pixels using the projection
-
-      // Place it at the bottom of the state, centered
-
-
-      // Transform the <g> group so that everything moves together easily
-
-
-      // To fix the oscillation, we add this in the CSS for .mouseover
-      //  pointer-events: none;
-
-      // Technically, the right way to do this is with another mesh for some complicated reasons
-      //  You have to use the second parameter of topojson.mesh() to pick out this state's boundaries
-      // At the end of the lecture we tried this out
-      //  First, make a new mesh with a filter for only borders of the current state
-
-      //  Then apply it to your special mesh that's on top of everything else
-
-
-
-
-
-
-
-
                 });
-
-
-
             });
-
-
         }
 
         getData();
