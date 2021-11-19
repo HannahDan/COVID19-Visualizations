@@ -35,6 +35,7 @@
 
         .gridlines line { stroke: #bbb;}
         .gridlines .domain {stroke: none;}
+        .writing{font-weight: bold;}
 
     </style>
 </head>
@@ -53,9 +54,9 @@
 
     <p><h1>Vaccination rate vs Average Median Income in the US</h1> </p>
     <svg svg id="vax" height=600 width=800  >
-        <text  id="label", x="790" y = "60" text-anchor="end" alignment-baseline="baseline"></text>
-        <text  id="stateName", x="790" y = "80" text-anchor="end" alignment-baseline="baseline"></text>
-        <text  id="value", x="790" y = "100" text-anchor="end" alignment-baseline="baseline"></text>
+        <text  id="label", x="270" y = "60" text-anchor="end" alignment-baseline="baseline"></text>
+        <text  id="stateName", x="270" y = "80" text-anchor="end" alignment-baseline="baseline"></text>
+        <text  id="value", x="270" y = "100" text-anchor="end" alignment-baseline="baseline"></text>
     </svg>
     <div id="legend"></div>
 
@@ -86,7 +87,6 @@
 
             vaxData.forEach((d, i) => {
             d['fully_vaccinated']=Number(d['people_fully_vaccinated_per_hundred'])
-            d['dail']=Number(d['points'])
         });
 
         let income_data = d3.csv('kaggle_income.csv', d3.autoType).then(countyIncome => {
@@ -126,6 +126,7 @@
 
             // Gridlines and Axes
             let leftAxis = d3.axisLeft(vaxScale)
+                //.tickFormat(d3.format(".0%"))
                 .tickFormat(d3.format(""))
 
                 annotations.append("g")
@@ -142,7 +143,7 @@
                     .call(leftGridlines);
 
             let bottomAxis = d3.axisBottom(incomeScale)
-                .tickFormat(d3.format(""))
+                .tickFormat(d3.format("$.0d"))
                 .ticks(13)
 
             let bottomGridlines = d3.axisBottom(incomeScale)
@@ -161,32 +162,79 @@
                     .call(bottomGridlines);
 
             // Creating circles
-            let circles = chartArea.selectAll("circle").data(vaxData)
+            let circles = chartArea.selectAll("circle").data(statesIncome)
                 .join("circle")
-                .attr('cx', d=> Math.floor(incomeScale(d.daily_vaccinations_per_million)) + (Math.random()*8) - 4)
+                .attr('cx', d=> Math.floor(incomeScale(d.income)) + (Math.random()*8) - 4)
+                .data(vaxData)
                 .attr('cy', d=> Math.floor(vaxScale(d.fully_vaccinated))+ (Math.random()*8)-4)
                 .attr('r', 8)
                 .attr('opacity', '0.4')
-                .attr('gender', d=>d['state'])
-                .style("fill", d=>colorScale(d['state']))
+                .attr("fill", "green")
+                // .attr('stateColor', d=>d['location'])
+                // .style("fill", d=>colorScale(d['location']))
+
+            // Mouse actions for all circles
+            circles.on("mouseover", function() {
+                d3.select(this)
+                    .transition().duration(200)
+                    .attr('r', 14)
+                    .attr('opacity', '0.9')
+
+            //     // Adding to text to svg
+                let title = d3.select(this).datum()['location']
+                let percentVax = d3.select(this).datum()['fully_vaccinated']
+
+            let t_1=  d3.select("#label")
+                    .text(title)
+                    .attr("class", "writing")
+                    .raise()
+
+                let t_2=d3.select("#stateName")
+                    .text("Vaccination rate (%): " + percentVax)
+                    .attr("class", "writing")
+                    .raise()
+
+                t_1_length = Math.ceil(Number(t_1.node().getComputedTextLength()))
+                t_2_length = Math.ceil(Number(t_2.node().getComputedTextLength()))
+                // t_3_length = Math.ceil(Number(t_3.node().getComputedTextLength()))
+
+                // Calculating max text length for varying width of the rectangle
+                // of svg
+            //  let max =Math.max(t_1_length, t_2_length ,t_3_length)
+                let max =Math.max(t_1_length, t_2_length)
 
 
+                //Text box to display info
+                chartArea.append("rect")
+                    .attr('x', chartWidth/3 - max -40)
+                // .attr('x', 240)
+                    .attr('y', 30)
+                    .attr('width', max+20)
+                    .attr('height', 70)
+                    .attr('stroke', 'none')
+                    .attr('fill', 'white');
+                });
 
+            circles.on("mouseout", function() {
+                d3.select(this)
+                    .transition().duration(200)
+                    .attr('r', 8)
+                    .attr('opacity', '0.4')
 
+                chartArea.selectAll("rect").remove()
+
+                d3.select("#label")
+                    .text("");
+                d3.select("#stateName")
+                    .text("");
+                });
         })
-
-
-
-
-
 
     })
 
-
-
-
     }
 
+    // Function call for Scatter plot
     scatterPlot()
 
     </script>
@@ -196,6 +244,7 @@
 
 
     <script>
+        //Function call for date slider map
         chgraphtime();
 
 
@@ -235,7 +284,9 @@
 
       <script id="jkm253">
 
-        // Jade's graph
+        //=======================================================================================
+        // ########################## Jade's Graph #############################################
+        // =====================================================================================
 
         let getData = async function () {
             let countyIncome = d3.csv('kaggle_income.csv', d3.autoType).then(countyIncome => {
