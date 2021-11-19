@@ -23,9 +23,19 @@
             padding-bottom: 10;
         }
 
+        .bullet-text{
+            font-family: 'Times New Roman';
+            font-size: 30px;
+            font-style: italic;
+        }
+
         .mouseover {
           pointer-events: none;
         }
+
+        .gridlines line { stroke: #bbb;}
+        .gridlines .domain {stroke: none;}
+
     </style>
 </head>
 
@@ -41,8 +51,154 @@
 
     </p>
 
+    <p><h1>Vaccination rate vs Average Median Income in the US</h1> </p>
+    <svg svg id="vax" height=600 width=800  >
+        <text  id="label", x="790" y = "60" text-anchor="end" alignment-baseline="baseline"></text>
+        <text  id="stateName", x="790" y = "80" text-anchor="end" alignment-baseline="baseline"></text>
+        <text  id="value", x="790" y = "100" text-anchor="end" alignment-baseline="baseline"></text>
+    </svg>
+    <div id="legend"></div>
+
+    <div id="p_rect"></div>
+
+
+    <script id="king">
+        //=======================================================================================
+        // ########################## Scatter Plot #############################################
+        // ===================================================================================
+
+       function scatterPlot() {
+
+        const svg=d3.select('svg#vax')
+        const width=svg.attr('width')
+        const height=svg.attr('height')
+        const margin={top: 10, left: 50, right: 15, bottom: 50};
+        const chartWidth= width-margin.left-margin.right;
+        const chartHeight= height-margin.top-margin.bottom;
+
+        let annotations = svg.append("g").attr("id","annotations");
+        const chartArea=svg.append('g')
+            .attr('transform',`translate(${margin.left}, ${margin.top})`);
+
+        // Load Scatter plot vaccination data
+        d3.csv('./vaccination_rate_state upd.csv', d3.autoType).then((vaxData)=>{
+            console.log(vaxData)
+
+            vaxData.forEach((d, i) => {
+            d['fully_vaccinated']=Number(d['people_fully_vaccinated_per_hundred'])
+            d['dail']=Number(d['points'])
+        });
+
+        let income_data = d3.csv('kaggle_income.csv', d3.autoType).then(countyIncome => {
+            let states = new Set(d3.map(countyIncome, d => d['State_ab']));
+                let statesIncome = [];
+
+                countyIncome.forEach((d, i) => {
+                    d.Median = Number(d.Median)
+                });
+                states.forEach(d => {
+                    let sum = 0;
+                    let i = d3.filter(countyIncome, c => {
+                        return c['State_ab'] === d;
+                    });
+                    i.forEach(c => {
+                        sum = sum + c['Median'];
+                    })
+                    //  console.log(sum)
+                    statesIncome.push({ state: d, income: sum / i.length });
+                });
+                    //console.log(statesIncome);
+
+            // Convert to Number format
+            statesIncome.forEach(d=>{
+                d.income=Number(d.income)
+            })
+            console.log(statesIncome)
+
+            const vaxExtent=d3.extent(vaxData, d=>d.fully_vaccinated)
+            const incomeExtent=d3.extent(statesIncome, d=>d.income)
+
+            incomeScale=d3.scaleLinear().domain(incomeExtent).range([0, chartWidth])
+            vaxScale=d3.scaleLinear().domain(vaxExtent).range([chartHeight, 0])
+            colorScale=d3.scaleOrdinal(d3.schemeCategory10)
+
+
+
+            // Gridlines and Axes
+            let leftAxis = d3.axisLeft(vaxScale)
+                .tickFormat(d3.format(""))
+
+                annotations.append("g")
+                    .attr("class", "y axis")
+                    .attr("transform","translate("+(margin.left)+","+margin.top+")")
+                    .call(leftAxis)
+
+            let leftGridlines = d3.axisLeft(vaxScale)
+                .tickSize(-chartWidth-10)
+                .tickFormat("")
+
+                annotations.append('g').attr('class', 'y gridlines')
+                    .attr('transform',`translate(${margin.left},${margin.top})`)
+                    .call(leftGridlines);
+
+            let bottomAxis = d3.axisBottom(incomeScale)
+                .tickFormat(d3.format(""))
+                .ticks(13)
+
+            let bottomGridlines = d3.axisBottom(incomeScale)
+                .tickSize(-chartHeight-50)
+                .tickFormat("")
+                .ticks(13);
+
+                annotations.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform",`translate(${margin.left},${chartHeight+margin.top+15})`)
+                    .call(bottomAxis);
+
+                annotations.append("g")
+                    .attr("class", "x gridlines")
+                    .attr("transform",`translate(${margin.left},${chartHeight+margin.top+15})`)
+                    .call(bottomGridlines);
+
+            // Creating circles
+            let circles = chartArea.selectAll("circle").data(vaxData)
+                .join("circle")
+                .attr('cx', d=> Math.floor(incomeScale(d.daily_vaccinations_per_million)) + (Math.random()*8) - 4)
+                .attr('cy', d=> Math.floor(vaxScale(d.fully_vaccinated))+ (Math.random()*8)-4)
+                .attr('r', 8)
+                .attr('opacity', '0.4')
+                .attr('gender', d=>d['state'])
+                .style("fill", d=>colorScale(d['state']))
+
+
+
+
+        })
+
+
+
+
+
+
+    })
+
+
+
+
+    }
+
+    scatterPlot()
+
+    </script>
+
+    <script> </script>
+
+
+
     <script>
         chgraphtime();
+
+
         async function getAverageByState() {
             let countyIncome = d3.csv('kaggle_income.csv', d3.autoType).then(countyIncome => {
                 let states = new Set(d3.map(countyIncome, d => d['State_ab']));
@@ -62,7 +218,7 @@
                     //  console.log(sum)
                     statesIncome.push({ state: d, income: sum / i.length });
                 });
-                console.log(statesIncome);
+              //  console.log(statesIncome);
                 return statesIncome;
             });
         }
@@ -70,11 +226,12 @@
 
     <h2>Median Income by State</h4>
     <p>
-      <svg id="jkm253" height=500 width=750 style="margin: 20px" /></svg>
+      <svg id="jkm253" height=500 width=750 style="margin: 20px" ></svg>
     </p>
     <h4>Key: Median Income</h4>
     <ul id="legend">
     </ul>
+
 
       <script id="jkm253">
 
@@ -160,13 +317,14 @@
                         .style("fill", "none");
 
                     let thresholds = colorScale.quantiles();
-                    console.log(thresholds);
+             //       console.log(thresholds);
 
                     let list = d3.select("ul#legend");
 
                     thresholds.forEach(elem => {
                       list.append("li")
-                        .text("Up to " + elem);
+                        .attr("class", "bullet-text")
+                        .text("Up to " + d3.format("($.0d")(elem));
                     });
 
                     let tooltipWidth = 110;
