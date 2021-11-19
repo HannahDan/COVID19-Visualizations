@@ -10,11 +10,6 @@ function chgraphtime() {
         d3.csv('us_state_vaccinations.csv', d3.autoType).then((data) => {
 
             data = data.filter(d => d['date'] != null && d['people_fully_vaccinated'] != null && d['location'] != null);
-            //  console.log(data)
-            // csv -> {'Alabama': {
-            //     'date1': {values},
-            //     'date2': {}
-            // }}
 
             const svg = d3.select("#vis1").append('svg').style("margin", "auto").attr('width', 750).attr('height', 500);
             const width = svg.attr('width');
