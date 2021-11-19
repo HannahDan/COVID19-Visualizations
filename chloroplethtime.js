@@ -10,11 +10,6 @@ function chgraphtime() {
         d3.csv('us_state_vaccinations.csv', d3.autoType).then((data) => {
 
             data = data.filter(d => d['date'] != null && d['people_fully_vaccinated'] != null && d['location'] != null);
-          //  console.log(data)
-            // csv -> {'Alabama': {
-            //     'date1': {values},
-            //     'date2': {}
-            // }}
 
             const svg = d3.select("#vis1").append('svg').style("margin", "auto").attr('width', 750).attr('height', 500);
             const width = svg.attr('width');
@@ -53,14 +48,14 @@ function chgraphtime() {
             );
 
 
-       //     console.log(rangeDate[1]);
+            //     console.log(rangeDate[1]);
 
             var projection = d3
                 .geoAlbersUsa()
                 .fitSize([mapWidth, mapHeight], st);
             let path = d3.geoPath().projection(projection)
             const colors = ["#ADCF9C", "#74C67A", "#16837A", "#0F596B", "#0A2F51"];
-           // console.log(us.objects.states.geometries);
+            // console.log(us.objects.states.geometries);
             const vals = data.map((d) => d.people_fully_vaccinated);
             let colorScale = d3.scaleQuantile().domain(vals).range(colors);
             mapArea.selectAll("states").data(st.features)

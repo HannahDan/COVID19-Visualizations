@@ -1,4 +1,5 @@
 <html>
+
 <head>
     <script src="https://unpkg.com/d3-regression@1.3.9/dist/d3-regression.min.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -7,7 +8,6 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
     <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
     <script src="https://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
-
     <style>
         body * {
             font-family: 'Optima', sans-serif;
@@ -15,29 +15,41 @@
             margin-left: auto;
             margin-right: auto;
         }
+
         p {
             background-color: rgba(156, 180, 224, 0.468);
             padding-top: 10;
             padding-bottom: 10;
         }
-        .bullet-text{
-            font-family: 'Times New Roman';
-            font-size: 25px;
-            font-style: italic;
+
+        .bullet-text {
+            font-family: 'Optima';
         }
+
         .mouseover {
-          pointer-events: none;
+            pointer-events: none;
         }
-        .gridlines line { stroke: #bbb;}
-        .gridlines .domain {stroke: none;}
-        .writing{font-weight: bold;}
+
+        .gridlines line {
+            stroke: #bbb;
+        }
+
+        .gridlines .domain {
+            stroke: none;
+        }
+
+        .writing {
+            font-weight: bold;
+        }
+
         .button {
             background-color: white;
             color: black;
             border: 2px solid green;
             border-radius: 8px;
             font-size: 25px;
-}
+        }
+
         .button:active {
             background-color: #3e8e41;
             box-shadow: 0 5px #666;
@@ -48,32 +60,35 @@
 
 <body>
     <h2 style="text-align: center;">Number of People Fully Vaccinated for COVID-19 from Jan 2021 to Nov 2021</h2>
-    <div id="vis1" style="align-content: center;"></div>
+    <div id="vis1" style="text-align: center;"></div>
     <p style=" text-align: center;">
         <label for="amount">Date slider:</label>
-        <input type="range" id='slider' step="86400"></input>
+        <input type="range" id='slider' step="86400" oninput="this.nextElementSibling.value = this.value"></input>
+
     <h4>Key</h4>
     <ul id="list">
     </ul>
 
     </p>
 
-    <p><h1>Vaccination rate vs Average Median Income in the US</h1> </p>
-    <svg svg id="vax" height=600 width=800  >
-        <text  id="label", x="270" y = "60" text-anchor="end" alignment-baseline="baseline"></text>
-        <text  id="vaxLabel", x="270" y = "80" text-anchor="end" alignment-baseline="baseline"></text>
-        <text  id="value", x="270" y = "100" text-anchor="end" alignment-baseline="baseline"></text>
+    <p>
+    <h1>Vaccination rate vs Average Median Income in the US</h1>
+    </p>
+    <svg svg id="vax" height=600 width=800>
+        <text id="label" , x="270" y="60" text-anchor="end" alignment-baseline="baseline"></text>
+        <text id="vaxLabel" , x="270" y="80" text-anchor="end" alignment-baseline="baseline"></text>
+        <text id="value" , x="270" y="100" text-anchor="end" alignment-baseline="baseline"></text>
     </svg>
     <div id="legend"></div>
 
     <div id="p_rect"></div>
 
     <div>
-        <button id="Linear" class="button" >Linear</button>
-        <button id="Exponential"class="button">Exponential</button>
-        <button id="Logarithmic"class="button">Logarithmic</button>
-        <button id="Polynomial"class="button">Polynomial</button>
-        </div>
+        <button id="Linear" class="button">Linear</button>
+        <button id="Exponential" class="button">Exponential</button>
+        <button id="Logarithmic" class="button">Logarithmic</button>
+        <button id="Polynomial" class="button">Polynomial</button>
+    </div>
 
 
     <script id="Kingsley">
@@ -81,171 +96,171 @@
         // ########################## Scatter Plot #############################################
         // ===================================================================================
 
-       function scatterPlot() {
+        function scatterPlot() {
 
-        const svg=d3.select('svg#vax')
-        const width=svg.attr('width')
-        const height=svg.attr('height')
-        const margin={top: 10, left: 50, right: 15, bottom: 50};
-        const chartWidth= width-margin.left-margin.right;
-        const chartHeight= height-margin.top-margin.bottom;
+            const svg = d3.select('svg#vax')
+            const width = svg.attr('width')
+            const height = svg.attr('height')
+            const margin = { top: 10, left: 50, right: 15, bottom: 50 };
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
 
-        let annotations = svg.append("g").attr("id","annotations");
-        const chartArea=svg.append('g')
-            .attr('transform',`translate(${margin.left}, ${margin.top})`);
+            let annotations = svg.append("g").attr("id", "annotations");
+            const chartArea = svg.append('g')
+                .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-        // Load Scatter plot vaccination data
-        d3.csv('./vaccination_rate_state upd.csv', d3.autoType).then((vaxData)=>{
-            console.log(vaxData)
+            // Load Scatter plot vaccination data
+            d3.csv('./vaccination_rate_state upd.csv', d3.autoType).then((vaxData) => {
+                console.log(vaxData)
 
-            vaxData.forEach((d, i) => {
-            d['fully_vaccinated']=Number(d['people_fully_vaccinated_per_hundred'])
-        });
-
-        let income_data = d3.csv('kaggle_income.csv', d3.autoType).then(countyIncome => {
-            let states = new Set(d3.map(countyIncome, d => d['State_ab']));
-                let statesIncome = [];
-
-                countyIncome.forEach((d, i) => {
-                    d.Median = Number(d.Median)
+                vaxData.forEach((d, i) => {
+                    d['fully_vaccinated'] = Number(d['people_fully_vaccinated_per_hundred'])
                 });
-                states.forEach(d => {
-                    let sum = 0;
-                    let i = d3.filter(countyIncome, c => {
-                        return c['State_ab'] === d;
+
+                let income_data = d3.csv('kaggle_income.csv', d3.autoType).then(countyIncome => {
+                    let states = new Set(d3.map(countyIncome, d => d['State_ab']));
+                    let statesIncome = [];
+
+                    countyIncome.forEach((d, i) => {
+                        d.Median = Number(d.Median)
                     });
-                    i.forEach(c => {
-                        sum = sum + c['Median'];
-                    })
-                    //  console.log(sum)
-                    statesIncome.push({ state: d, income: sum / i.length });
-                });
+                    states.forEach(d => {
+                        let sum = 0;
+                        let i = d3.filter(countyIncome, c => {
+                            return c['State_ab'] === d;
+                        });
+                        i.forEach(c => {
+                            sum = sum + c['Median'];
+                        })
+                        //  console.log(sum)
+                        statesIncome.push({ state: d, income: sum / i.length });
+                    });
                     //console.log(statesIncome);
 
-            // Convert to Number format
-            statesIncome.forEach(d=>{
-                d.income=Number(d.income)
+                    // Convert to Number format
+                    statesIncome.forEach(d => {
+                        d.income = Number(d.income)
+                    })
+                    console.log(statesIncome)
+
+                    const vaxExtent = d3.extent(vaxData, d => d.fully_vaccinated)
+                    const incomeExtent = d3.extent(statesIncome, d => d.income)
+
+                    incomeScale = d3.scaleLinear().domain(incomeExtent).range([0, chartWidth])
+                    vaxScale = d3.scaleLinear().domain(vaxExtent).range([chartHeight, 0])
+                    colorScale = d3.scaleOrdinal(d3.schemeCategory10)
+
+                    // Gridlines and Axes
+                    let leftAxis = d3.axisLeft(vaxScale)
+                        //.tickFormat(d3.format(".0%"))
+                        .tickFormat(d3.format(""))
+
+                    annotations.append("g")
+                        .attr("class", "y axis")
+                        .attr("transform", "translate(" + (margin.left) + "," + margin.top + ")")
+                        .call(leftAxis)
+
+                    let leftGridlines = d3.axisLeft(vaxScale)
+                        .tickSize(-chartWidth - 10)
+                        .tickFormat("")
+
+                    annotations.append('g').attr('class', 'y gridlines')
+                        .attr('transform', `translate(${margin.left},${margin.top})`)
+                        .call(leftGridlines);
+
+                    let bottomAxis = d3.axisBottom(incomeScale)
+                        .tickFormat(d3.format("$.0d"))
+                        .ticks(13)
+
+                    let bottomGridlines = d3.axisBottom(incomeScale)
+                        .tickSize(-chartHeight - 50)
+                        .tickFormat("")
+                        .ticks(13);
+
+                    annotations.append("g")
+                        .attr("class", "x axis")
+                        .attr("transform", `translate(${margin.left},${chartHeight + margin.top + 15})`)
+                        .call(bottomAxis);
+
+                    annotations.append("g")
+                        .attr("class", "x gridlines")
+                        .attr("transform", `translate(${margin.left},${chartHeight + margin.top + 15})`)
+                        .call(bottomGridlines);
+
+                    // Creating circles
+                    let circles = chartArea.selectAll("circle").data(statesIncome)
+                        .join("circle")
+                        .attr('cx', d => Math.floor(incomeScale(d.income)) + (Math.random() * 8) - 4)
+                        .data(vaxData)
+                        .attr('cy', d => Math.floor(vaxScale(d.fully_vaccinated)) + (Math.random() * 8) - 4)
+                        .attr('r', 8)
+                        .attr('opacity', '0.4')
+                        .attr("fill", "green")
+                    // .attr('stateColor', d=>d['location'])
+                    // .style("fill", d=>colorScale(d['location']))
+
+                    // Mouse actions for all circles
+                    circles.on("mouseover", function () {
+                        d3.select(this)
+                            .transition().duration(200)
+                            .attr('r', 14)
+                            .attr('opacity', '0.9')
+
+                        //     // Adding to text to svg
+                        let title = d3.select(this).datum()['location']
+                        let percentVax = d3.select(this).datum()['fully_vaccinated']
+
+                        let t_1 = d3.select("#label")
+                            .text(title)
+                            .attr("class", "writing")
+                            .raise()
+
+                        let t_2 = d3.select("#vaxLabel")
+                            .text("Vaccination rate (%): " + percentVax)
+                            .attr("class", "writing")
+                            .raise()
+
+                        t_1_length = Math.ceil(Number(t_1.node().getComputedTextLength()))
+                        t_2_length = Math.ceil(Number(t_2.node().getComputedTextLength()))
+                        // t_3_length = Math.ceil(Number(t_3.node().getComputedTextLength()))
+
+                        // Calculating max text length for varying width of the rectangle
+                        // of svg
+                        //  let max =Math.max(t_1_length, t_2_length ,t_3_length)
+                        let max = Math.max(t_1_length, t_2_length)
+
+
+                        //Text box to display info
+                        chartArea.append("rect")
+                            .attr('x', chartWidth / 3 - max - 40)
+                            .attr('y', 30)
+                            .attr('width', max + 20)
+                            .attr('height', 70)
+                            .attr('stroke', 'none')
+                            .attr('fill', 'white');
+                    });
+
+                    circles.on("mouseout", function () {
+                        d3.select(this)
+                            .transition().duration(200)
+                            .attr('r', 8)
+                            .attr('opacity', '0.4')
+
+                        chartArea.selectAll("rect").remove()
+
+                        d3.select("#label")
+                            .text("");
+                        d3.select("#vaxLabel")
+                            .text("");
+                    });
+                })
+
             })
-            console.log(statesIncome)
 
-            const vaxExtent=d3.extent(vaxData, d=>d.fully_vaccinated)
-            const incomeExtent=d3.extent(statesIncome, d=>d.income)
+        }
 
-            incomeScale=d3.scaleLinear().domain(incomeExtent).range([0, chartWidth])
-            vaxScale=d3.scaleLinear().domain(vaxExtent).range([chartHeight, 0])
-            colorScale=d3.scaleOrdinal(d3.schemeCategory10)
-
-            // Gridlines and Axes
-            let leftAxis = d3.axisLeft(vaxScale)
-                //.tickFormat(d3.format(".0%"))
-                .tickFormat(d3.format(""))
-
-                annotations.append("g")
-                    .attr("class", "y axis")
-                    .attr("transform","translate("+(margin.left)+","+margin.top+")")
-                    .call(leftAxis)
-
-            let leftGridlines = d3.axisLeft(vaxScale)
-                .tickSize(-chartWidth-10)
-                .tickFormat("")
-
-                annotations.append('g').attr('class', 'y gridlines')
-                    .attr('transform',`translate(${margin.left},${margin.top})`)
-                    .call(leftGridlines);
-
-            let bottomAxis = d3.axisBottom(incomeScale)
-                .tickFormat(d3.format("$.0d"))
-                .ticks(13)
-
-            let bottomGridlines = d3.axisBottom(incomeScale)
-                .tickSize(-chartHeight-50)
-                .tickFormat("")
-                .ticks(13);
-
-                annotations.append("g")
-                    .attr("class", "x axis")
-                    .attr("transform",`translate(${margin.left},${chartHeight+margin.top+15})`)
-                    .call(bottomAxis);
-
-                annotations.append("g")
-                    .attr("class", "x gridlines")
-                    .attr("transform",`translate(${margin.left},${chartHeight+margin.top+15})`)
-                    .call(bottomGridlines);
-
-            // Creating circles
-            let circles = chartArea.selectAll("circle").data(statesIncome)
-                .join("circle")
-                .attr('cx', d=> Math.floor(incomeScale(d.income)) + (Math.random()*8) - 4)
-                .data(vaxData)
-                .attr('cy', d=> Math.floor(vaxScale(d.fully_vaccinated))+ (Math.random()*8)-4)
-                .attr('r', 8)
-                .attr('opacity', '0.4')
-                .attr("fill", "green")
-                // .attr('stateColor', d=>d['location'])
-                // .style("fill", d=>colorScale(d['location']))
-
-            // Mouse actions for all circles
-            circles.on("mouseover", function() {
-                d3.select(this)
-                    .transition().duration(200)
-                    .attr('r', 14)
-                    .attr('opacity', '0.9')
-
-            //     // Adding to text to svg
-                let title = d3.select(this).datum()['location']
-                let percentVax = d3.select(this).datum()['fully_vaccinated']
-
-            let t_1=  d3.select("#label")
-                    .text(title)
-                    .attr("class", "writing")
-                    .raise()
-
-                let t_2=d3.select("#vaxLabel")
-                    .text("Vaccination rate (%): " + percentVax)
-                    .attr("class", "writing")
-                    .raise()
-
-                t_1_length = Math.ceil(Number(t_1.node().getComputedTextLength()))
-                t_2_length = Math.ceil(Number(t_2.node().getComputedTextLength()))
-                // t_3_length = Math.ceil(Number(t_3.node().getComputedTextLength()))
-
-                // Calculating max text length for varying width of the rectangle
-                // of svg
-            //  let max =Math.max(t_1_length, t_2_length ,t_3_length)
-                let max =Math.max(t_1_length, t_2_length)
-
-
-                //Text box to display info
-                chartArea.append("rect")
-                    .attr('x', chartWidth/3 - max -40)
-                    .attr('y', 30)
-                    .attr('width', max+20)
-                    .attr('height', 70)
-                    .attr('stroke', 'none')
-                    .attr('fill', 'white');
-                });
-
-            circles.on("mouseout", function() {
-                d3.select(this)
-                    .transition().duration(200)
-                    .attr('r', 8)
-                    .attr('opacity', '0.4')
-
-                chartArea.selectAll("rect").remove()
-
-                d3.select("#label")
-                    .text("");
-                d3.select("#vaxLabel")
-                    .text("");
-                });
-        })
-
-    })
-
-    }
-
-    // Function call for Scatter plot
-    scatterPlot()
+        // Function call for Scatter plot
+        scatterPlot()
 
     </script>
 
@@ -277,191 +292,191 @@
                     //  console.log(sum)
                     statesIncome.push({ state: d, income: sum / i.length });
                 });
-              //  console.log(statesIncome);
+                //  console.log(statesIncome);
                 return statesIncome;
             });
         }
     </script>
 
     <h2>Median Income by State</h4>
-    <p>
-      <svg id="jkm253" height=500 width=750 style="margin: 20px" ></svg>
-    </p>
-    <h4>Key: Median Income</h4>
-    <ul id="legend">
-    </ul>
+        <p>
+            <svg id="jkm253" height=500 width=750 style="margin: 20px"></svg>
+        </p>
+        <h4>Key: Median Income</h4>
+        <ul id="legend">
+        </ul>
 
 
-      <script id="jkm253">
+        <script id="jkm253">
 
-        //=======================================================================================
-        // ########################## Jade's Graph #############################################
-        // =====================================================================================
+            //=======================================================================================
+            // ########################## Jade's Graph #############################################
+            // =====================================================================================
 
-        let getData = async function () {
-            let countyIncome = d3.csv('kaggle_income.csv', d3.autoType).then(countyIncome => {
-                let states = new Set(d3.map(countyIncome, d => d['State_Name']));
-                let statesIncome = [];
+            let getData = async function () {
+                let countyIncome = d3.csv('kaggle_income.csv', d3.autoType).then(countyIncome => {
+                    let states = new Set(d3.map(countyIncome, d => d['State_Name']));
+                    let statesIncome = [];
 
-                countyIncome.forEach((d, i) => {
-                    d.Median = Number(d.Median)
-                });
-                states.forEach(d => {
-                    let sum = 0;
-                    let i = d3.filter(countyIncome, c => {
-                        return c['State_Name'] === d;
+                    countyIncome.forEach((d, i) => {
+                        d.Median = Number(d.Median)
                     });
-                    i.forEach(c => {
-                        sum = sum + c['Median'];
-                    })
-                    //  console.log(sum)
-                    statesIncome.push({ state: d, income: sum / i.length });
-                });
+                    states.forEach(d => {
+                        let sum = 0;
+                        let i = d3.filter(countyIncome, c => {
+                            return c['State_Name'] === d;
+                        });
+                        i.forEach(c => {
+                            sum = sum + c['Median'];
+                        })
+                        //  console.log(sum)
+                        statesIncome.push({ state: d, income: sum / i.length });
+                    });
 
-                let state_data = d3.json('us_states.json', d3.autoType).then(state_data => {
-                    var state_income = statesIncome;
+                    let state_data = d3.json('us_states.json', d3.autoType).then(state_data => {
+                        var state_income = statesIncome;
 
-                    let svg = d3.select("svg#jkm253");
-                    let svgWidth = svg.attr("width");
-                    let svgHeight = svg.attr("height");
+                        let svg = d3.select("svg#jkm253");
+                        let svgWidth = svg.attr("width");
+                        let svgHeight = svg.attr("height");
 
-                    let states = topojson.feature(state_data, state_data.objects.states);
-                    let statesMesh = topojson.mesh(state_data, state_data.objects.states);
-                    let usMesh = topojson.mesh(state_data, state_data.objects.nation);
+                        let states = topojson.feature(state_data, state_data.objects.states);
+                        let statesMesh = topojson.mesh(state_data, state_data.objects.states);
+                        let usMesh = topojson.mesh(state_data, state_data.objects.nation);
 
-                    let projection = d3.geoAlbersUsa().fitSize([svgWidth, svgHeight], states);
-                    var path = d3.geoPath().projection(projection);
+                        let projection = d3.geoAlbersUsa().fitSize([svgWidth, svgHeight], states);
+                        var path = d3.geoPath().projection(projection);
 
-                    let colorArray = ["#0d06aa", "#0055d5", "#1eabd0", "#00d4a1", "#6aff45"];
+                        let colorArray = ["#0d06aa", "#0055d5", "#1eabd0", "#00d4a1", "#6aff45"];
 
-                    for (var i = 0; i < state_income.length; i++) {
-                        let per = state_data.objects.states.geometries;
-                        let arr_state = state_income[i].state;
-                        let arr_income = state_income[i].income;
+                        for (var i = 0; i < state_income.length; i++) {
+                            let per = state_data.objects.states.geometries;
+                            let arr_state = state_income[i].state;
+                            let arr_income = state_income[i].income;
 
-                        for (var j = 0; j < per.length; j++) {
-                            var json_state = per[j].properties.name;
-                            if (arr_state == json_state) {
-                                per[j].properties.value = arr_income;
-                                break;
+                            for (var j = 0; j < per.length; j++) {
+                                var json_state = per[j].properties.name;
+                                if (arr_state == json_state) {
+                                    per[j].properties.value = arr_income;
+                                    break;
+                                };
                             };
                         };
-                    };
 
-                    incomeExtent = d3.extent(state_income, d => d['income']);
+                        incomeExtent = d3.extent(state_income, d => d['income']);
 
-                    let colorScale = d3.scaleQuantile()
-                        .domain(incomeExtent)
-                        .range(colorArray);
+                        let colorScale = d3.scaleQuantile()
+                            .domain(incomeExtent)
+                            .range(colorArray);
 
-                    svg.selectAll("path.states")
-                        .data(states.features)
-                        .join("path")
-                        .attr("class", "states")
-                        .attr("d", path)
-                        .style("fill", d => colorScale(d.properties.value));
+                        svg.selectAll("path.states")
+                            .data(states.features)
+                            .join("path")
+                            .attr("class", "states")
+                            .attr("d", path)
+                            .style("fill", d => colorScale(d.properties.value));
 
-                    svg.append("path")
-                        .datum(statesMesh)
-                        .attr("class", "outline")
-                        .attr("d", path)
-                        .style("stroke-width", 1)
-                        .style("stroke", "white")
-                        .style("fill", "none");
+                        svg.append("path")
+                            .datum(statesMesh)
+                            .attr("class", "outline")
+                            .attr("d", path)
+                            .style("stroke-width", 1)
+                            .style("stroke", "white")
+                            .style("fill", "none");
 
-                    svg.append("path")
-                        .datum(usMesh)
-                        .attr("class", "outline")
-                        .attr("d", path)
-                        .style("stroke-width", 3)
-                        .style("stroke", "darkgrey")
-                        .style("fill", "none");
+                        svg.append("path")
+                            .datum(usMesh)
+                            .attr("class", "outline")
+                            .attr("d", path)
+                            .style("stroke-width", 3)
+                            .style("stroke", "darkgrey")
+                            .style("fill", "none");
 
-                    let thresholds = colorScale.quantiles();
-             //       console.log(thresholds);
+                        let thresholds = colorScale.quantiles();
+                        //       console.log(thresholds);
 
-                    let list = d3.select("ul#legend");
+                        let list = d3.select("ul#legend");
 
-                    thresholds.forEach(elem => {
-                      list.append("li")
-                        .attr("class", "bullet-text")
-                        .text("Up to " + d3.format("($.0d")(elem));
+                        thresholds.forEach(elem => {
+                            list.append("li")
+                                .attr("class", "bullet-text")
+                                .text("Up to " + d3.format("($.0d")(elem));
+                        });
+
+                        let tooltipWidth = 110;
+                        let tooltipHeight = 50;
+
+                        let moMesh = svg.append("path")
+                            .attr("class", "mouseOutline");
+
+                        let tooltip = svg.append("g")
+                            .attr("class", "tooltip")
+                            .attr("visibility", "hidden");
+
+                        tooltip.append("rect")
+                            .attr("fill", "black")
+                            .attr("opacity", 0.9)
+                            .attr("x", -tooltipWidth / 2.0)
+                            .attr("y", 0)
+                            .attr("rx", 5)
+                            .attr("ry", 5)
+                            .attr("width", tooltipWidth)
+                            .attr("height", tooltipHeight)
+
+                        let labelName = tooltip.append("text")
+                            .attr("fill", "white")
+                            .attr("text-anchor", "middle")
+                            .attr("alignment-baseline", "hanging")
+                            .attr("x", 0)
+                            .attr("y", 10);
+
+                        let labelValue = tooltip.append("text")
+                            .attr("fill", "white")
+                            .attr("text-anchor", "middle")
+                            .attr("alignment-baseline", "hanging")
+                            .attr("x", 0)
+                            .attr("y", 26);
+
+                        d3.selectAll(".states").on("mouseenter", mouseEntersPlot);
+                        d3.selectAll(".states").on("mouseout", mouseLeavesPlot);
+
+                        function mouseEntersPlot() {
+                            let priceFormat = Intl.NumberFormat("en-US", {
+                                style: "currency",
+                                currency: "USD",
+                                maximumFractionDigits: 0
+                            });
+
+                            tooltip.style("visibility", "visible")
+                            let state = d3.select(this);
+                            let stateName = state.datum().properties.name;
+                            let stateValue = state.datum().properties.value;
+                            labelName.text(stateName);
+                            labelValue.text(priceFormat.format(stateValue));
+
+                            let bounds = path.bounds(state.datum());
+                            let xPos = (bounds[0][0] + bounds[1][0]) / 2.0;
+                            let yPos = bounds[1][1] - 15;
+                            tooltip.attr("transform", `translate(${xPos},${yPos})`);
+                        };
+
+                        function mouseLeavesPlot() {
+                            tooltip.style("visibility", "hidden");
+
+                            let state = d3.select(this);
+
+                            state.attr("stroke", "none")
+                                .attr("stroke-width", 0);
+                        };
                     });
-
-                    let tooltipWidth = 110;
-                    let tooltipHeight = 50;
-
-                    let moMesh =  svg.append("path")
-                      .attr("class", "mouseOutline");
-
-                    let tooltip = svg.append("g")
-                      .attr("class", "tooltip")
-                      .attr("visibility", "hidden");
-
-                    tooltip.append("rect")
-                      .attr("fill", "black")
-                      .attr("opacity", 0.9)
-                      .attr("x", -tooltipWidth / 2.0)
-                      .attr("y", 0)
-                      .attr("rx", 5)
-                      .attr("ry", 5)
-                      .attr("width",tooltipWidth)
-                      .attr("height",tooltipHeight)
-
-                    let labelName = tooltip.append("text")
-                      .attr("fill", "white")
-                      .attr("text-anchor","middle")
-                      .attr("alignment-baseline","hanging")
-                      .attr("x", 0)
-                      .attr("y", 10);
-
-                    let labelValue = tooltip.append("text")
-                      .attr("fill", "white")
-                      .attr("text-anchor","middle")
-                      .attr("alignment-baseline","hanging")
-                      .attr("x", 0)
-                      .attr("y", 26);
-
-                   d3.selectAll(".states").on("mouseenter", mouseEntersPlot);
-                   d3.selectAll(".states").on("mouseout",  mouseLeavesPlot);
-
-                   function mouseEntersPlot() {
-                     let priceFormat = Intl.NumberFormat("en-US", {
-                         style: "currency",
-                         currency: "USD",
-                         maximumFractionDigits: 0
-                     });
-
-                     tooltip.style("visibility","visible")
-                     let state = d3.select(this);
-                     let stateName = state.datum().properties.name;
-                     let stateValue = state.datum().properties.value;
-                     labelName.text(stateName);
-                     labelValue.text(priceFormat.format(stateValue));
-
-                     let bounds = path.bounds(state.datum());
-                     let xPos = (bounds[0][0]+bounds[1][0])/2.0;
-                     let yPos = bounds[1][1] - 15;
-                     tooltip.attr("transform",`translate(${xPos},${yPos})`);
-                   };
-
-                   function mouseLeavesPlot() {
-                    tooltip.style("visibility","hidden");
-
-                    let state = d3.select(this);
-
-                    state.attr("stroke","none")
-                      .attr("stroke-width", 0);
-                  };
                 });
-            });
-        }
+            }
 
-        getData();
-
+            getData();
 
 
-    </script>
+
+        </script>
 </body>
 
 </html>
