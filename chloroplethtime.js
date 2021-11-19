@@ -1,7 +1,7 @@
 function chgraphtime() {
 
     const requestData = async function () {
-        const us = await d3.json('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json');
+        const us = await d3.json('us_states.json');
         // console.log(us);
         const st = topojson.feature(us, us.objects.states);
         const stMesh = topojson.mesh(us, us.objects.states);
@@ -10,7 +10,7 @@ function chgraphtime() {
         d3.csv('us_state_vaccinations.csv', d3.autoType).then((data) => {
 
             data = data.filter(d => d['date'] != null && d['people_fully_vaccinated'] != null && d['location'] != null);
-          //  console.log(data)
+            //  console.log(data)
             // csv -> {'Alabama': {
             //     'date1': {values},
             //     'date2': {}
@@ -53,14 +53,14 @@ function chgraphtime() {
             );
 
 
-       //     console.log(rangeDate[1]);
+            //     console.log(rangeDate[1]);
 
             var projection = d3
                 .geoAlbersUsa()
                 .fitSize([mapWidth, mapHeight], st);
             let path = d3.geoPath().projection(projection)
             const colors = ["#ADCF9C", "#74C67A", "#16837A", "#0F596B", "#0A2F51"];
-           // console.log(us.objects.states.geometries);
+            // console.log(us.objects.states.geometries);
             const vals = data.map((d) => d.people_fully_vaccinated);
             let colorScale = d3.scaleQuantile().domain(vals).range(colors);
             mapArea.selectAll("states").data(st.features)
@@ -73,8 +73,8 @@ function chgraphtime() {
                 .attr("d", path)
                 .style("stroke", "white")
                 .style("fill", "transparent")
-                .style("stroke-width", 2);
-            mapArea.append("path").datum(stMesh)
+                .style("stroke-width", 1);
+            mapArea.append("path").datum(nation)
                 .attr("class", "statemesh")
                 .attr("d", path)
                 .style("stroke", "darkgrey")
