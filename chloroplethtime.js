@@ -10,7 +10,7 @@ function chgraphtime() {
         d3.csv('us_state_vaccinations.csv', d3.autoType).then((data) => {
 
             data = data.filter(d => d['date'] != null && d['people_fully_vaccinated'] != null && d['location'] != null);
-            console.log(data)
+          //  console.log(data)
             // csv -> {'Alabama': {
             //     'date1': {values},
             //     'date2': {}
@@ -53,14 +53,14 @@ function chgraphtime() {
             );
 
 
-            console.log(rangeDate[1]);
+       //     console.log(rangeDate[1]);
 
             var projection = d3
                 .geoAlbersUsa()
                 .fitSize([mapWidth, mapHeight], st);
             let path = d3.geoPath().projection(projection)
             const colors = ["#ADCF9C", "#74C67A", "#16837A", "#0F596B", "#0A2F51"];
-            console.log(us.objects.states.geometries);
+           // console.log(us.objects.states.geometries);
             const vals = data.map((d) => d.people_fully_vaccinated);
             let colorScale = d3.scaleQuantile().domain(vals).range(colors);
             mapArea.selectAll("states").data(st.features)
@@ -103,7 +103,7 @@ function chgraphtime() {
                     list.append("li").text("Up to " + Math.floor(colorScale.invertExtent(d)[1]) + " vaccinations").style('color', d).attr("class", "bullet-text");
                 }
             });
-            list.append("li").text("No information for date").style('color', 'grey');
+            list.append("li").text("No information for date").style('color', 'grey').attr("class", "bullet-text");
             d3.select('#slider')
                 .attr('min', rangeDate[0].getTime() / 1000)
                 .attr('max', rangeDate[1].getTime() / 1000)
