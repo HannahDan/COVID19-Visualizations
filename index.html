@@ -158,12 +158,14 @@
                 // Convert to Number format
                 statesIncome.forEach(d => {
                     d.income = Number(d.income)
-                })
+                });
+                console.log(vaxData);
                 // Merge parts fully vaccinated data to states avegrage income data
                 statesIncome.forEach((d, i) => {
                     d.vax = vaxData[i].fully_vaccinated;
                     d.location = vaxData[i].location;
-                })
+
+                });
 
                 console.log(statesIncome)
                 //Scales
