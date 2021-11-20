@@ -62,7 +62,7 @@
 <body>
     <h2 style="text-align: center;">Number of People Fully Vaccinated for COVID-19 from Jan 2021 to Nov 2021</h2>
     <div id="vis1" style="text-align: center;"></div>
-    <p style=" text-align: center;">
+    <p style="text-align: center;">
         <label for="amount">Date slider:</label>
         <input type="range" id='slider' step="86400" width="300"></input>
 
@@ -72,8 +72,8 @@
 
     </p>
 
-    <h2>Median Income by State</h4>
-        <p>
+    <h2 style="text-align: center;">Median Household Income by State</h4>
+        <p style="text-align: center; background-color: white;">
             <svg id="jkm253" height=500 width=750 style="margin: 20px"></svg>
         </p>
     <h3>Key: Median Income</h3>
@@ -469,14 +469,15 @@
                     .style("fill", "none");
 
                 let thresholds = colorScale.quantiles();
-                //       console.log(thresholds);
 
                 let list = d3.select("ul#legend");
 
-                thresholds.forEach(elem => {
-                    list.append("li")
-                        .attr("class", "bullet-text")
-                        .text("Up to " + d3.format("($.0d")(elem));
+                colorArray.forEach((d) => {
+                  list.append("li")
+                    .text("Up to " + d3.format("$,.0d")(colorScale.invertExtent(d)[1]))
+                    .style('color', d)
+                    .attr("class", "bullet-text");
+                    console.log(colorScale.invertExtent(d)[1]);
                 });
 
                 let tooltipWidth = 110;
